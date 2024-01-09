@@ -80,7 +80,8 @@ Major lithic components
 
 all_lithics_major_classes <- 
 all_lithics %>% 
-  mutate(bipolar = `bipolar core` + `bipolar flake`)  %>% 
+  rowwise() %>% 
+  mutate(bipolar = sum(c(`bipolar core`, `bipolar flake`), na.rm = TRUE))  %>% 
   select(layer...3, 
          cores = `core total`,           
          flakes =  `flake total`,           
@@ -88,7 +89,7 @@ all_lithics %>%
          debris = `debris...21`,
          chunks,
          `heat\ntreated` = `burn rocks`,
-       # mineral = mineral...23,
+        mineral = mineral...23,
         bipolar
          ) %>% 
   pivot_longer(-layer...3) %>% 
@@ -99,7 +100,7 @@ all_lithics %>%
                                    "heat\ntreated",
                                    "retouched\npieces",
                                    "cores",
-                                  # "mineral",
+                                   "mineral",
                                    "bipolar"
                                    )))  %>% 
   mutate(stage = case_when(
@@ -176,7 +177,7 @@ all_flakes %>%
     `raw material` == "G" ~ "limestone",
     `raw material` == "H" ~ "gelite",
     `raw material` == "I" ~ "siltstone",
-    # no J!
+    # no J! Opal is missing from this key
     `raw material` == "K" ~ "crystal\nquartz",
     `raw material` == "L" ~ "packsand",
     `raw material` == "M" ~ "marlstone",
@@ -396,7 +397,7 @@ squares_on_strat_plot <-
     "N45E50", 
     "N45E51")
 
-# reading ages off the strat plot
+# reading ages and depths off the strat plot
 strat_with_dates_on_strat_plot <- 
   tribble(~Stratigraphy, ~depth, ~lab_no,
     "2020N45E53L1",     0.5,       "Beta - 605198",       
@@ -491,23 +492,6 @@ c14_ages_cal_dens %>%
 
 library(Bchron)
 
-ages2 = BchronCalibrate(ages =   c14_ages_clean$age,
-                        ageSds = c14_ages_clean$error,
-                        calCurves=rep('intcal20', 
-                                      nrow(c14_ages_clean)),
-                        ids = c14_ages_clean$Lab.no.,
-                        positions = c14_ages_clean$depth)
-
-summary(ages2)
-
-library(ggplot2)
-plot(ages2, 
-     dateHeight = 0.6,
-     dateLabels = TRUE
-     ) +
-  labs(x = 'Age (cal. years BP)',
-       y = 'Depth (m)')
-
 
 c14_ages_clean_out = 
                Bchronology(ages =          c14_ages_clean$age,
@@ -520,19 +504,21 @@ c14_ages_clean_out =
                                                 max(c14_ages_clean$depth),
                                                 by=1))
 
-# use this one, with the strat plot, add climate plot using
-# https://github.com/benmarwick/gsloid
+# use this one, with the strat plot, 
+zgd_c14_ages_depth_age_plot <- 
 plot(c14_ages_clean_out,
     dateHeight = 0.3,
      chronTransparency = 0.2,
      chronCol = "grey80",
-    scaleReverse = FALSE,
-     dateLabels = TRUE) +
+     scaleReverse = FALSE,
+     dateLabels = TRUE,
+     dateLabelSize = 2) +
      labs(x = 'Age (cal. years BP)',
           y = 'Depth (m)') +
   theme(axis.text.x = element_text(angle = 90,
                                    hjust = 0,
-                                   vjust = 0.5))
+                                   vjust = 0.5)) +
+  scale_x_continuous(limits = c(0,47000), expand = c(0, 0)) 
 
 ggsave("figures/c14-age-depth-fit.png",
        dpi = 600,
@@ -541,4 +527,54 @@ ggsave("figures/c14-age-depth-fit.png",
        bg = "white")
 
 ```
+
+
+```{r}
+# add oxygen isotope plot
+library(gsloid)
+mis_last_50ka <- LR04_MISboundaries[LR04_MISboundaries$LR04_Age_ka_start <= 50, ]
+
+
+global_oxygen_isotope_curve_plot <- 
+ggplot(lisiecki2005, 
+       aes(Time,
+           d18O)) +
+  geom_line() +
+  geom_vline(data = mis_last_50ka,          # add MIS lines
+             aes(xintercept = LR04_Age_ka_start),
+             colour = "blue") +
+  annotate("text", 
+           label = paste0("MIS ", mis_last_50ka$label_MIS), 
+           x = mis_last_50ka$LR04_Age_ka_mid,
+           y = 3,
+           size = 3) +
+    annotate("text", 
+           label = "MIS 3", 
+           x = 40,
+           y = 3,
+           size = 3) +
+  scale_x_continuous(limits = c(0,47), 
+                     expand = c(0, 0),
+                     name = "x 1000 years ago") +
+  scale_y_reverse(name = bquote(delta^18*O)) +
+  theme_bw() 
+```
+
+```{r}
+library(cowplot)
+
+plot_grid(zgd_c14_ages_depth_age_plot,
+          global_oxygen_isotope_curve_plot,
+          ncol = 1,
+          rel_heights = c(1, 0.3),
+          align = "v")
+
+ggsave("figures/c14-age-depth-fit-oxygen-isotope.png",
+       dpi = 600,
+       h = 10, 
+       w = 8,
+       bg = "white")
+```
+
+
 
