@@ -148,6 +148,36 @@ all_flakes <-
              sheet = "Sheet1",
              skip = 1)
 
+# some artefacts are not assigned to a phase, is that ok?
+all_flakes %>% 
+  select(layer,
+         `raw material`) %>% 
+    mutate(stage = case_when(
+  layer %in% lp_phase_1 ~ "Late Pleistocene Phase 1",
+  layer %in% lp_phase_2 ~ "Late Pleistocene Phase 2",
+  layer %in% lp_phase_3 ~ "Late Pleistocene Phase 3",
+  layer %in% neolithic ~  "Holocene",
+  layer %in% surface ~    "Surface"
+ )) %>% 
+  group_by(stage) %>% 
+  tally()
+
+# which levels are not assigned?
+all_flakes %>% 
+  select(layer,
+         `raw material`) %>% 
+    mutate(stage = case_when(
+  layer %in% lp_phase_1 ~ "Late Pleistocene Phase 1",
+  layer %in% lp_phase_2 ~ "Late Pleistocene Phase 2",
+  layer %in% lp_phase_3 ~ "Late Pleistocene Phase 3",
+  layer %in% neolithic ~  "Holocene",
+  layer %in% surface ~    "Surface"
+ )) %>% 
+  filter(is.na(stage)) %>% 
+  group_by(layer) %>% 
+  tally()
+
+
 all_flakes_with_phases <- 
 all_flakes %>% 
   select(layer,
@@ -172,18 +202,24 @@ all_flakes %>%
     `raw material` == "B" ~ "chert\n(grey)",
     `raw material` == "C" ~ "chert\n(black)",
     `raw material` == "D" ~ "chert\n(stripe)",
-    `raw material` == "E" ~ "quartzite\n(grey white)",
-    `raw material` == "F" ~ "quartzite\n(grey white)",
+    `raw material` == "E" ~ "quartzite\n(grey-white)",
+    `raw material` == "F" ~ "quartzite\n(grey-white)",
     `raw material` == "G" ~ "limestone",
-    `raw material` == "H" ~ "gelite",
+    `raw material` == "H" ~ "opal",
     `raw material` == "I" ~ "siltstone",
-    # no J! Opal is missing from this key
+    `raw material` == "J" ~ "chalcedony",
     `raw material` == "K" ~ "crystal\nquartz",
     `raw material` == "L" ~ "packsand",
     `raw material` == "M" ~ "marlstone",
-    `raw material` == "N" ~ "rhyolite"
+    .default = "others"
   )) %>% 
   mutate(raw_material = fct_infreq(raw_material))
+
+# check how many raw material types per stage
+all_flakes_with_phases %>% 
+  group_by(stage) %>% 
+  summarise(nd = n_distinct(raw_material))
+
 
 ggplot(all_flakes_with_phases) +
   aes(raw_material) +
@@ -375,6 +411,50 @@ ggplot(core_attributes_types) +
   scale_fill_viridis_d()
 
 ggsave("figures/lithic-core-types.png",
+       dpi = 600,
+       h = 6, 
+       w = 8,
+       bg = "white")
+```
+
+
+```{r}
+# core types using the summary data from HY, rather than the raw data
+
+core_types <- 
+  read_excel("data/summary-data-for-core-types-only.xlsx",
+             skip = 1) %>% 
+  filter(Category == "Core") %>% 
+  select(-Category) %>% 
+  pivot_longer(-Type) %>% 
+    mutate(stage = case_when(
+  name == "Phase 1" ~ "Late\nPleistocene\nPhase 1",
+  name == "Phase 2"  ~ "Late\nPleistocene\nPhase 2",
+  name == "Phase 3"  ~ "Late\nPleistocene\nPhase 3",
+  name == "Neolithic level" ~       "Holocene",
+  name == "Neolithic top unit" ~    "Surface"
+ )) %>% 
+  # what do H5-H7 belong to?
+  filter(!is.na(stage)) %>% 
+  mutate(stage = factor(stage, 
+                        levels = c("Late\nPleistocene\nPhase 1",
+                                   "Late\nPleistocene\nPhase 2",
+                                   "Late\nPleistocene\nPhase 3",
+                                   "Holocene",
+                                   "Surface"))) 
+
+ggplot(core_types) +
+  aes(x = stage, 
+      y = value,
+      fill = Type) +
+  geom_col() +
+  coord_flip()  +
+  theme_minimal() +
+  theme(legend.position = c(0.5, 0.3))  +
+  xlab("")  +
+  scale_fill_viridis_d()
+
+ggsave("figures/lithic-core-types-from-summary-table.png",
        dpi = 600,
        h = 6, 
        w = 8,
