@@ -19,12 +19,17 @@ all_lithics <-
 lp_phase_1 <- c("L37", "L38", "HT49", "HT50", "HT51")
 lp_phase_2 <- c(paste0("L", 13:16), paste0("L", 28:36), 
                 paste0("H", 22:23), paste0("HT", 43:47))
-lp_phase_3 <- c("HT under the hearth 3", "L12", "HT41", "HT42", "HT48")
-neolithic <-  c("HT under the hearth", 
+lp_phase_3 <- c("HT under the hearth 3", 
+                "under the hearth 3",
+                "L12", "HT41", "HT42", "HT48")
+ha_phase_1 <-  c("HT under the hearth", 
+                 "under the hearth",
+                 "under the hearth 1",
+                 "under the hearth 2",
                 paste0("HT under the hearth ", 1:2),
                 paste0("L", 2:11), paste0("HT", 24:40), 
                 paste0("HDM", 1:23))
-surface <- "L1"
+ha_phase_2 <- "L1"
 
 all_lithics <- 
   all_lithics %>% 
@@ -36,8 +41,8 @@ all_lithics <-
   layer...3 %in% lp_phase_1 ~ "Late Pleistocene Phase 1",
   layer...3 %in% lp_phase_2 ~ "Late Pleistocene Phase 2",
   layer...3 %in% lp_phase_3 ~ "Late Pleistocene Phase 3",
-  layer...3 %in% neolithic ~  "Holocene",
-  layer...3 %in% surface ~    "Surface"
+  layer...3 %in% ha_phase_1 ~  "Holocene Phase 1",
+  layer...3 %in% ha_phase_2 ~  "Holocene Phase 2"
  )) %>% 
   # what do H5-H7 belong to?
   filter(!is.na(stage)) %>% 
@@ -45,8 +50,8 @@ all_lithics <-
                         levels = c("Late Pleistocene Phase 1",
                                    "Late Pleistocene Phase 2",
                                    "Late Pleistocene Phase 3",
-                                   "Holocene",
-                                   "Surface"))) 
+                                   "Holocene Phase 1",
+                                   "Holocene Phase 2"))) 
 ```
 
 all artefacts
@@ -107,17 +112,16 @@ all_lithics %>%
   layer...3 %in% lp_phase_1 ~ "Late Pleistocene Phase 1",
   layer...3 %in% lp_phase_2 ~ "Late Pleistocene Phase 2",
   layer...3 %in% lp_phase_3 ~ "Late Pleistocene Phase 3",
-  layer...3 %in% neolithic ~  "Holocene",
-  layer...3 %in% surface ~    "Surface"
- )) %>% 
+  layer...3 %in% ha_phase_1 ~  "Holocene Phase 1",
+  layer...3 %in% ha_phase_2 ~  "Holocene Phase 2")) %>% 
   # what do H5-H7 belong to?
   filter(!is.na(stage)) %>% 
   mutate(stage = factor(stage, 
                         levels = c("Late Pleistocene Phase 1",
                                    "Late Pleistocene Phase 2",
                                    "Late Pleistocene Phase 3",
-                                   "Holocene",
-                                   "Surface"))) %>% 
+                                   "Holocene Phase 1",
+                                   "Holocene Phase 2"))) %>% 
   group_by(stage, name) %>% 
   summarise(sum = sum(value, na.rm = TRUE))
 
@@ -156,8 +160,8 @@ all_flakes %>%
   layer %in% lp_phase_1 ~ "Late Pleistocene Phase 1",
   layer %in% lp_phase_2 ~ "Late Pleistocene Phase 2",
   layer %in% lp_phase_3 ~ "Late Pleistocene Phase 3",
-  layer %in% neolithic ~  "Holocene",
-  layer %in% surface ~    "Surface"
+  layer %in% ha_phase_1 ~  "Holocene Phase 1",
+  layer %in% ha_phase_2 ~  "Holocene Phase 2"
  )) %>% 
   group_by(stage) %>% 
   tally()
@@ -170,12 +174,13 @@ all_flakes %>%
   layer %in% lp_phase_1 ~ "Late Pleistocene Phase 1",
   layer %in% lp_phase_2 ~ "Late Pleistocene Phase 2",
   layer %in% lp_phase_3 ~ "Late Pleistocene Phase 3",
-  layer %in% neolithic ~  "Holocene",
-  layer %in% surface ~    "Surface"
+  layer %in% ha_phase_1 ~  "Holocene Phase 1",
+  layer %in% ha_phase_2 ~  "Holocene Phase 2"
  )) %>% 
   filter(is.na(stage)) %>% 
   group_by(layer) %>% 
   tally()
+# all are assigned now
 
 
 all_flakes_with_phases <- 
@@ -186,8 +191,8 @@ all_flakes %>%
   layer %in% lp_phase_1 ~ "Late Pleistocene Phase 1",
   layer %in% lp_phase_2 ~ "Late Pleistocene Phase 2",
   layer %in% lp_phase_3 ~ "Late Pleistocene Phase 3",
-  layer %in% neolithic ~  "Holocene",
-  layer %in% surface ~    "Surface"
+  layer %in% ha_phase_1 ~  "Holocene Phase 1",
+  layer %in% ha_phase_2 ~  "Holocene Phase 2"
  )) %>% 
   # what do H5-H7 belong to?
   filter(!is.na(stage)) %>% 
@@ -195,8 +200,8 @@ all_flakes %>%
                         levels = c("Late Pleistocene Phase 1",
                                    "Late Pleistocene Phase 2",
                                    "Late Pleistocene Phase 3",
-                                   "Holocene",
-                                   "Surface"))) %>% 
+                                   "Holocene Phase 1",
+                                   "Holocene Phase 2"))) %>% 
   mutate(raw_material = case_when(
     `raw material` == "A" ~ "chert\n(black)",
     `raw material` == "B" ~ "chert\n(grey)",
@@ -275,17 +280,16 @@ all_flakes %>%
   layer %in% lp_phase_1 ~ "Late\nPleistocene\nPhase 1",
   layer %in% lp_phase_2 ~ "Late\nPleistocene\nPhase 2",
   layer %in% lp_phase_3 ~ "Late\nPleistocene\nPhase 3",
-  layer %in% neolithic ~  "Holocene",
-  layer %in% surface ~    "Surface"
- )) %>% 
+  layer %in% ha_phase_1 ~  "Holocene\nPhase 1",
+  layer %in% ha_phase_2 ~  "Holocene\nPhase 2" )) %>% 
   # what do H5-H7 belong to?
   filter(!is.na(stage)) %>% 
   mutate(stage = factor(stage, 
                         levels = c("Late\nPleistocene\nPhase 1",
                                    "Late\nPleistocene\nPhase 2",
                                    "Late\nPleistocene\nPhase 3",
-                                   "Holocene",
-                                   "Surface"))) 
+                                   "Holocene\nPhase 1",
+                                   "Holocene\nPhase 2"))) 
 
 library(ggbeeswarm)
 library(ggpmisc)
@@ -342,8 +346,8 @@ core_attributes %>%
   layer %in% lp_phase_1 ~ "Late\nPleistocene\nPhase 1",
   layer %in% lp_phase_2 ~ "Late\nPleistocene\nPhase 2",
   layer %in% lp_phase_3 ~ "Late\nPleistocene\nPhase 3",
-  layer %in% neolithic ~  "Holocene",
-  layer %in% surface ~    "Surface"
+  layer %in% ha_phase_1 ~  "Holocene\nPhase 1",
+  layer %in% ha_phase_2 ~  "Holocene\nPhase 2"
  )) %>% 
   # what do H5-H7 belong to?
   filter(!is.na(stage)) %>% 
@@ -351,8 +355,8 @@ core_attributes %>%
                         levels = c("Late\nPleistocene\nPhase 1",
                                    "Late\nPleistocene\nPhase 2",
                                    "Late\nPleistocene\nPhase 3",
-                                   "Holocene",
-                                   "Surface"))) 
+                                   "Holocene\nPhase 1",
+                                   "Holocene\nPhase 2"))) 
 
 library(ggbeeswarm)
 library(ggpmisc)
@@ -388,8 +392,8 @@ core_attributes %>%
   layer %in% lp_phase_1 ~ "Late\nPleistocene\nPhase 1",
   layer %in% lp_phase_2 ~ "Late\nPleistocene\nPhase 2",
   layer %in% lp_phase_3 ~ "Late\nPleistocene\nPhase 3",
-  layer %in% neolithic ~  "Holocene",
-  layer %in% surface ~    "Surface"
+  layer %in% ha_phase_1 ~  "Holocene\nPhase 1",
+  layer %in% ha_phase_2 ~  "Holocene\nPhase 2"
  )) %>% 
   # what do H5-H7 belong to?
   filter(!is.na(stage)) %>% 
@@ -397,8 +401,8 @@ core_attributes %>%
                         levels = c("Late\nPleistocene\nPhase 1",
                                    "Late\nPleistocene\nPhase 2",
                                    "Late\nPleistocene\nPhase 3",
-                                   "Holocene",
-                                   "Surface"))) 
+                                   "Holocene\nPhase 1",
+                                   "Holocene\nPhase 2"))) 
 
 ggplot(core_attributes_types) +
   aes(stage, 
@@ -431,8 +435,8 @@ core_types <-
   name == "Phase 1" ~ "Late\nPleistocene\nPhase 1",
   name == "Phase 2"  ~ "Late\nPleistocene\nPhase 2",
   name == "Phase 3"  ~ "Late\nPleistocene\nPhase 3",
-  name == "Neolithic level" ~       "Holocene",
-  name == "Neolithic top unit" ~    "Surface"
+  name == "Neolithic level" ~       "Holocene\nPhase 1",
+  name == "Neolithic top unit" ~    "Holocene\nPhase 2"
  )) %>% 
   # what do H5-H7 belong to?
   filter(!is.na(stage)) %>% 
@@ -440,8 +444,8 @@ core_types <-
                         levels = c("Late\nPleistocene\nPhase 1",
                                    "Late\nPleistocene\nPhase 2",
                                    "Late\nPleistocene\nPhase 3",
-                                   "Holocene",
-                                   "Surface"))) 
+                                   "Holocene\nPhase 1",
+                                   "Holocene\nPhase 2"))) 
 
 ggplot(core_types) +
   aes(x = stage, 
@@ -469,6 +473,17 @@ Radiocarbon ages
 c14_ages <- 
   read_excel("data/C14 results of zgd.xlsx",
              skip = 1)
+
+# from the paper:
+# LPA;  44,881-11,251 cal. BP
+# HA;   10,430-7752 cal. BP
+
+# LPA I (Layer 25-21); 
+# LPA II (Layer 20-17); 
+# LPA III (Layer 16-9);
+# HA I (Layer 8-2);  
+# HA II (Layer 1)
+
 
 squares_on_strat_plot <- 
   c("N46E47", 
@@ -516,62 +531,7 @@ c14_ages %>%
   mutate(lab_no = fct_reorder(lab_no, age))
 # this square is not on the excavation map: N51E48
 
-library(rcarbon)
-xx <- 
-  rcarbon::calibrate(x= c14_ages_clean$age,
-            errors=c14_ages_clean$error,
-            calCurves='intcal20',
-            ids=c14_ages_clean$lab_no)
-
-multiplot(xx,
-          decreasing=TRUE,
-          rescale=TRUE,
-          HPD=TRUE,
-          col.fill = factor(c14_ages_clean$Material),
-          cex.id = 0.5,
-          label.pos=0.1,
-          label.offset=5500,
-          xlim = c(55000, 10000))
-
-library(c14bazAAR)
-
-c14_ages_clean_list <- 
-as.c14_date_list(data.frame(c14age = c14_ages_clean$age, 
-                            c14std = c14_ages_clean$error,
-                            labnr = c14_ages_clean$lab_no,
-                            depth = c14_ages_clean$depth,
-                            material = c14_ages_clean$Material))
-
-c14_ages_clean_list_calib <- 
-c14bazAAR::calibrate(
-  c14_ages_clean_list,
-  choices = c("calprobdistr"),
-  ids = c14_ages_clean$lab_no,
-  sigma = 1
-)
-
-c14_ages_cal_dens <- 
-  c14_ages_clean_list_calib %>% 
-  tidyr::unnest(cols = c("calprobdistr")) %>% 
-    mutate(labnr = fct_reorder(labnr, c14age))
-
-c14_ages_cal_dens %>%
-  ggplot() +
-  # a special geom for ridgeplots is provided by the ggridges package
-  ggridges::geom_ridgeline(
-    aes(x = -calage + 1950, 
-        y = labnr, 
-        colour = material,
-        fill = material,
-        height = density),
-    scale = 50
-  ) +
-  xlab("age calBC/calAD") +
-  ylab("dates") +
-  theme_minimal()
-
 library(Bchron)
-
 
 c14_ages_clean_out = 
                Bchronology(ages =          c14_ages_clean$age,
