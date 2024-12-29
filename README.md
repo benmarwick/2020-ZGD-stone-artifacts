@@ -1,7 +1,5 @@
 ## Research compendium for 'New Evidence of Human Occupation in Southwest China Since 44,800 Years ago'
 
----
-
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14567759.svg)](https://doi.org/10.5281/zenodo.14567759)
 
 This repository contains the data and code for our paper:
