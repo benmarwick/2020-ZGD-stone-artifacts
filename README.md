@@ -1,8 +1,14 @@
-## Research compendium for 'New Evidence of Human Occupation in Southwest China Since 44,800 Years ago' [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14567759.svg)](https://doi.org/10.5281/zenodo.14567759)
+## Research compendium for 'New Evidence of Human Occupation in Southwest China Since 44,800 Years ago'
+
+---
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14567759.svg)](https://doi.org/10.5281/zenodo.14567759)
 
 This repository contains the data and code for our paper:
 
 Hongliang Lu, Xinglong Zhang, Yaping Qin, Guobing Yang, Yun Chen, Pengchen Xu, Ming Huang, Ming Jiang, Ben Marwick & Yue Hu (2024) New Evidence of Human Occupation in Southwest China Since 44,800 Years ago, *Lithic Technology* <http://doi.org/10.1080/01977261.2024.2435718> [PDF](/paper/Hongliang-el-al-2024-Zhaoguodong.pdf)
+
+This repository is also archived for long-term availability at https://doi.org/10.5281/zenodo.14567759 
 
 ## Contents
 
