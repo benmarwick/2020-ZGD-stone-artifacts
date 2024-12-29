@@ -12,7 +12,7 @@ This repository is also archived for long-term availability at https://doi.org/1
 
 The analysis directory contains:
 
--   [:file_folder: paper](/paper): The Quarto document in this folder contains R code that produced several of the figures in the paper. To reproduce the key finding of the paper, start with this qmd file. A [PDF](/paper/Hongliang-el-al-2024-Zhaoguodong.pdf) of the published paper is also in this folder.
+-   [:file_folder: paper](/paper): The Quarto document in this folder contains R code that produced several of the figures in the paper. To reproduce the key data analyses and visualisations presented in the paper, start with this qmd file. A [PDF](/paper/Hongliang-el-al-2024-Zhaoguodong.pdf) of the published paper is also in this folder.
 -   [:file_folder: data](/data): Data used in the analysis
 -   [:file_folder: figures](/analysis/figures): Plots and other illustrations
 
