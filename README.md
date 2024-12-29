@@ -2,15 +2,15 @@
 
 This repository contains the data and code for our paper:
 
-Hongliang Lu, Xinglong Zhang, Yaping Qin, Guobing Yang, Yun Chen, Pengchen Xu, Ming Huang, Ming Jiang, Ben Marwick & Yue Hu (2024) New Evidence of Human Occupation in Southwest China Since 44,800 Years ago, *Lithic Technology* <http://doi.org/10.1080/01977261.2024.2435718>
+Hongliang Lu, Xinglong Zhang, Yaping Qin, Guobing Yang, Yun Chen, Pengchen Xu, Ming Huang, Ming Jiang, Ben Marwick & Yue Hu (2024) New Evidence of Human Occupation in Southwest China Since 44,800 Years ago, *Lithic Technology* <http://doi.org/10.1080/01977261.2024.2435718> [PDF](/paper/Hongliang-el-al-2024-Zhaoguodong.pdf)
 
 ## Contents
 
 The analysis directory contains:
 
-- [:file_folder: paper](/paper): The Quarto document in this folder contains R code that produced several of the figures in the paper. To reproduce the key finding of the paper, start with this qmd file
-- [:file_folder: data](/data): Data used in the analysis
-- [:file_folder: figures](/analysis/figures): Plots and other illustrations
+-   [:file_folder: paper](/paper): The Quarto document in this folder contains R code that produced several of the figures in the paper. To reproduce the key finding of the paper, start with this qmd file. A [PDF](/paper/Hongliang-el-al-2024-Zhaoguodong.pdf) of the published paper is also in this folder.
+-   [:file_folder: data](/data): Data used in the analysis
+-   [:file_folder: figures](/analysis/figures): Plots and other illustrations
 
 ## Licenses
 
@@ -22,7 +22,7 @@ The analysis directory contains:
 
 ## Session Info
 
-```
+```         
 R version 4.4.1 (2024-06-14)
 Platform: x86_64-apple-darwin20
 Running under: macOS Sonoma 14.6.1
