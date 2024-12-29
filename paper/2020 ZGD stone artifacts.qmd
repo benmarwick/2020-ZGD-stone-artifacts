@@ -4,15 +4,178 @@ format:
   html:
     self-contained: true
 ---
+```{r}
+library(tidyverse)
+library(readxl)
+library(here)
+
+```
+
+
+
+Radiocarbon ages - this is for Fig 3
+
+```{r}
+c14_ages <- 
+  readxl::read_excel(here("data/C14 results of zgd.xlsx"),
+             skip = 1)
+
+# from the paper:
+# LPA;  44,881-11,251 cal. BP
+# HA;   10,430-7752 cal. BP
+
+# LPA I (Layer 25-21); 
+# LPA II (Layer 20-17); 
+# LPA III (Layer 16-9);
+# HA I (Layer 8-2);  
+# HA II (Layer 1)
+
+
+squares_on_strat_plot <- 
+  c("N46E47", 
+    "N46E48", 
+    "N45E49", 
+    "N45E50", 
+    "N45E51")
+
+# reading ages and depths off the strat plot
+strat_with_dates_on_strat_plot <- 
+  tribble(~Stratigraphy, ~depth, ~lab_no,
+    "2020N45E53L1",     0.5,       "Beta - 605198",       
+    "2016L12",          1.6,       "Beta - 455945",    
+    "2016L21",          2.8,       "Beta - 455946",    
+    "2020N46E50L10",    3.1,       "Beta - 580436",    
+    "2016L30",          3.3,       "Beta - 455947",     
+    "2020N46E51L14",    3.6,       "Beta - 580437",     
+    "2016L42-1",        4.18,      "Beta - 455948",     
+    "2016L42-2",        4.2,       "Beta - 436101",     
+    "2016L42-3",        4.22,      "Beta - 436102",    
+    "2016HT11",         4.6,       "Beta - 455949",    
+    "2016L67",          6.5,       "Beta - 445878",    
+    "2020HT51",         6.9,       "Beta - 576105",      
+    "2020HT51",         7.0,       "Beta - 576104"    
+    )
+
+c14_ages_clean <- 
+c14_ages %>% 
+  separate_wider_delim(`Coventional Radiocarbon age (BP)`,
+           names = c("age", "error"),
+           delim = "+/-",
+           cols_remove = FALSE) %>% 
+  mutate(age = parse_number(age),
+         error = parse_number(error)) %>% 
+  mutate(square = str_extract(Stratigraphy, "N.{5}"),
+         north = str_extract(square, "N.{2}"),
+         east = str_extract(square, "E.{2}"),
+         level = str_extract(Stratigraphy, "L.{1,2}"),
+         level_num = parse_number(level),
+         other_level = str_extract(Stratigraphy, "H.{1,3}"),
+         lab_no = Lab.no.) %>% 
+  right_join(strat_with_dates_on_strat_plot,
+             by = join_by(lab_no)) %>% 
+  arrange(age) %>% 
+  mutate(lab_no = fct_reorder(lab_no, age))
+# this square is not on the excavation map: N51E48
+```
+
+```{r}
+#| output: false
+
+library(Bchron)
+
+c14_ages_clean_out = 
+               Bchronology(ages =          c14_ages_clean$age,
+                           ageSds =        c14_ages_clean$error, 
+                           calCurves = rep('intcal20', 
+                                      nrow(c14_ages_clean)),
+                           positions=      c14_ages_clean$depth, 
+                           ids=     c14_ages_clean$lab_no, 
+                           predictPositions=seq(0,
+                                                max(c14_ages_clean$depth),
+                                                by=1))
+```
+
+```{r}
+
+# use this one, with the strat plot, 
+zgd_c14_ages_depth_age_plot <- 
+plot(c14_ages_clean_out,
+    dateHeight = 0.3,
+     chronTransparency = 0.2,
+     chronCol = "grey80",
+     scaleReverse = FALSE,
+     dateLabels = TRUE,
+     dateLabelSize = 2) +
+     labs(x = 'Age (cal. years BP)',
+          y = 'Depth (m)') +
+  theme(axis.text.x = element_text(angle = 90,
+                                   hjust = 0,
+                                   vjust = 0.5)) +
+  scale_x_continuous(limits = c(0,47000), expand = c(0, 0)) 
+
+ggsave(here("figures/c14-age-depth-fit.png"),
+       dpi = 600,
+       h = 6, 
+       w = 8,
+       bg = "white")
+
+```
+
+This is for Fig 3
+
+```{r}
+# add oxygen isotope plot
+library(gsloid)
+mis_last_50ka <- LR04_MISboundaries[LR04_MISboundaries$LR04_Age_ka_start <= 50, ]
+
+
+global_oxygen_isotope_curve_plot <- 
+ggplot(lisiecki2005, 
+       aes(Time,
+           d18O)) +
+  geom_line() +
+  geom_vline(data = mis_last_50ka,          # add MIS lines
+             aes(xintercept = LR04_Age_ka_start),
+             colour = "blue") +
+  annotate("text", 
+           label = paste0("MIS ", mis_last_50ka$label_MIS), 
+           x = mis_last_50ka$LR04_Age_ka_mid,
+           y = 3,
+           size = 3) +
+    annotate("text", 
+           label = "MIS 3", 
+           x = 40,
+           y = 3,
+           size = 3) +
+  scale_x_continuous(limits = c(0,47), 
+                     expand = c(0, 0),
+                     name = "x 1000 years ago") +
+  scale_y_reverse(name = bquote(delta^18*O)) +
+  theme_bw() 
+```
+
+```{r}
+library(cowplot)
+
+plot_grid(zgd_c14_ages_depth_age_plot,
+          global_oxygen_isotope_curve_plot,
+          ncol = 1,
+          rel_heights = c(1, 0.3),
+          align = "v")
+
+ggsave(here("figures/c14-age-depth-fit-oxygen-isotope.png"),
+       dpi = 600,
+       h = 10, 
+       w = 8,
+       bg = "white")
+```
 
 ## All artefacts
 
 ```{r}
-library(tidyverse)
-library(readxl)
 
 all_lithics <- 
-  read_excel("data/2020 Zhaoguodong all.xlsx", 
+  read_excel(here("data/2020 Zhaoguodong all.xlsx"), 
              skip = 1)
 
 # how do these levels relate to the numbered stratigraphic units?
@@ -54,7 +217,7 @@ all_lithics <-
                                    "Holocene Phase 2"))) 
 ```
 
-all artefacts
+all artefacts 
 
 ```{r}
 ggplot(all_lithics) +
@@ -77,7 +240,7 @@ ggplot(all_lithics) +
 ```
 
 
-Major lithic components
+Major lithic components - this is for Fig 6 panel A
 
 ```{r}
 # cores, flakes, retouched tools, debris, chunks, burnt rocks, and minerals
@@ -138,17 +301,17 @@ ggplot(all_lithics_major_classes) +
   theme_bw()
 
 
-ggsave("figures/lithic-classes-per-phase.png",
+ggsave(here("figures/lithic-classes-per-phase.png"),
        dpi = 600,
        h = 10, 
        w = 8)
 ```
 
-Raw material types
+Raw material types - this is for Fig 6 panel B
 
 ```{r}
 all_flakes <- 
-  read_excel("data/2020 zhaoguodong flake.xlsx",
+  read_excel(here("data/2020 zhaoguodong flake.xlsx"),
              sheet = "Sheet1",
              skip = 1)
 
@@ -237,14 +400,13 @@ ggplot(all_flakes_with_phases) +
   theme_bw()
 # looks a bit different from what's in the paper, no opal here, generally less diverse than in the paper, what is 'coloured black' chert?
 
-ggsave("figures/lithic-raw-material-per-phase.png",
+ggsave(here("figures/lithic-raw-material-per-phase.png"),
        dpi = 600,
        h = 10, 
        w = 8)
 ```
   
-  
-Flake attributes
+Flake attributes - this is for Fig 7
 
 ```{r}
 
@@ -308,7 +470,7 @@ ggplot(all_flakes_metrics) +
   ylab("") +
   theme_bw()
 
-ggsave("figures/lithic-flake-metrics.png",
+ggsave(here("figures/lithic-flake-metrics.png"),
        dpi = 600,
        h = 8, 
        w = 12)
@@ -316,11 +478,11 @@ ggsave("figures/lithic-flake-metrics.png",
 ```
 
 
-Core attributes
+Core attributes - not shown in paper
 
 ```{r}
 core_attributes <- 
-  read_excel("data/2020zhaoguodong core.xlsx",
+  read_excel(here("data/2020zhaoguodong core.xlsx"),
              skip = 1)
 
 core_attributes_stages <- 
@@ -414,19 +576,20 @@ ggplot(core_attributes_types) +
   xlab("")  +
   scale_fill_viridis_d()
 
-ggsave("figures/lithic-core-types.png",
+ggsave(here("figures/lithic-core-types.png"),
        dpi = 600,
        h = 6, 
        w = 8,
        bg = "white")
 ```
 
+Not shown in paper
 
 ```{r}
 # core types using the summary data from HY, rather than the raw data
 
 core_types <- 
-  read_excel("data/summary-data-for-core-types-only.xlsx",
+  read_excel(here("data/summary-data-for-core-types-only.xlsx"),
              skip = 1) %>% 
   filter(Category == "Core") %>% 
   select(-Category) %>% 
@@ -458,163 +621,10 @@ ggplot(core_types) +
   xlab("")  +
   scale_fill_viridis_d()
 
-ggsave("figures/lithic-core-types-from-summary-table.png",
+ggsave(here("figures/lithic-core-types-from-summary-table.png"),
        dpi = 600,
        h = 6, 
        w = 8,
        bg = "white")
 ```
-
-
-Radiocarbon ages
-
-
-```{r}
-c14_ages <- 
-  read_excel("data/C14 results of zgd.xlsx",
-             skip = 1)
-
-# from the paper:
-# LPA;  44,881-11,251 cal. BP
-# HA;   10,430-7752 cal. BP
-
-# LPA I (Layer 25-21); 
-# LPA II (Layer 20-17); 
-# LPA III (Layer 16-9);
-# HA I (Layer 8-2);  
-# HA II (Layer 1)
-
-
-squares_on_strat_plot <- 
-  c("N46E47", 
-    "N46E48", 
-    "N45E49", 
-    "N45E50", 
-    "N45E51")
-
-# reading ages and depths off the strat plot
-strat_with_dates_on_strat_plot <- 
-  tribble(~Stratigraphy, ~depth, ~lab_no,
-    "2020N45E53L1",     0.5,       "Beta - 605198",       
-    "2016L12",          1.6,       "Beta - 455945",    
-    "2016L21",          2.8,       "Beta - 455946",    
-    "2020N46E50L10",    3.1,       "Beta - 580436",    
-    "2016L30",          3.3,       "Beta - 455947",     
-    "2020N46E51L14",    3.6,       "Beta - 580437",     
-    "2016L42-1",        4.18,      "Beta - 455948",     
-    "2016L42-2",        4.2,       "Beta - 436101",     
-    "2016L42-3",        4.22,      "Beta - 436102",    
-    "2016HT11",         4.6,       "Beta - 455949",    
-    "2016L67",          6.5,       "Beta - 445878",    
-    "2020HT51",         6.9,       "Beta - 576105",      
-    "2020HT51",         7.0,       "Beta - 576104"    
-    )
-
-c14_ages_clean <- 
-c14_ages %>% 
-  separate_wider_delim(`Coventional Radiocarbon age (BP)`,
-           names = c("age", "error"),
-           delim = "+/-",
-           cols_remove = FALSE) %>% 
-  mutate(age = parse_number(age),
-         error = parse_number(error)) %>% 
-  mutate(square = str_extract(Stratigraphy, "N.{5}"),
-         north = str_extract(square, "N.{2}"),
-         east = str_extract(square, "E.{2}"),
-         level = str_extract(Stratigraphy, "L.{1,2}"),
-         level_num = parse_number(level),
-         other_level = str_extract(Stratigraphy, "H.{1,3}"),
-         lab_no = Lab.no.) %>% 
-  right_join(strat_with_dates_on_strat_plot,
-             by = join_by(lab_no)) %>% 
-  arrange(age) %>% 
-  mutate(lab_no = fct_reorder(lab_no, age))
-# this square is not on the excavation map: N51E48
-
-library(Bchron)
-
-c14_ages_clean_out = 
-               Bchronology(ages =          c14_ages_clean$age,
-                           ageSds =        c14_ages_clean$error, 
-                           calCurves = rep('intcal20', 
-                                      nrow(c14_ages_clean)),
-                           positions=      c14_ages_clean$depth, 
-                           ids=     c14_ages_clean$lab_no, 
-                           predictPositions=seq(0,
-                                                max(c14_ages_clean$depth),
-                                                by=1))
-
-# use this one, with the strat plot, 
-zgd_c14_ages_depth_age_plot <- 
-plot(c14_ages_clean_out,
-    dateHeight = 0.3,
-     chronTransparency = 0.2,
-     chronCol = "grey80",
-     scaleReverse = FALSE,
-     dateLabels = TRUE,
-     dateLabelSize = 2) +
-     labs(x = 'Age (cal. years BP)',
-          y = 'Depth (m)') +
-  theme(axis.text.x = element_text(angle = 90,
-                                   hjust = 0,
-                                   vjust = 0.5)) +
-  scale_x_continuous(limits = c(0,47000), expand = c(0, 0)) 
-
-ggsave("figures/c14-age-depth-fit.png",
-       dpi = 600,
-       h = 6, 
-       w = 8,
-       bg = "white")
-
-```
-
-
-```{r}
-# add oxygen isotope plot
-library(gsloid)
-mis_last_50ka <- LR04_MISboundaries[LR04_MISboundaries$LR04_Age_ka_start <= 50, ]
-
-
-global_oxygen_isotope_curve_plot <- 
-ggplot(lisiecki2005, 
-       aes(Time,
-           d18O)) +
-  geom_line() +
-  geom_vline(data = mis_last_50ka,          # add MIS lines
-             aes(xintercept = LR04_Age_ka_start),
-             colour = "blue") +
-  annotate("text", 
-           label = paste0("MIS ", mis_last_50ka$label_MIS), 
-           x = mis_last_50ka$LR04_Age_ka_mid,
-           y = 3,
-           size = 3) +
-    annotate("text", 
-           label = "MIS 3", 
-           x = 40,
-           y = 3,
-           size = 3) +
-  scale_x_continuous(limits = c(0,47), 
-                     expand = c(0, 0),
-                     name = "x 1000 years ago") +
-  scale_y_reverse(name = bquote(delta^18*O)) +
-  theme_bw() 
-```
-
-```{r}
-library(cowplot)
-
-plot_grid(zgd_c14_ages_depth_age_plot,
-          global_oxygen_isotope_curve_plot,
-          ncol = 1,
-          rel_heights = c(1, 0.3),
-          align = "v")
-
-ggsave("figures/c14-age-depth-fit-oxygen-isotope.png",
-       dpi = 600,
-       h = 10, 
-       w = 8,
-       bg = "white")
-```
-
-
 
